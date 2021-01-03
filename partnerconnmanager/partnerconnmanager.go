@@ -22,6 +22,7 @@ type PartnerConnManager struct {
 	AuthorizationCodeChan chan AuthorizationCode
 	ClientID              string
 	ProjectID             string
+	AuthorizedPath        string
 }
 
 func (p *PartnerConnManager) AuthorizeHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +39,8 @@ func (p *PartnerConnManager) AuthorizeHandler(w http.ResponseWriter, r *http.Req
 		fmt.Fprint(w, err.Error())
 		return
 	}
+
+	uri.Path = p.AuthorizedPath
 
 	v := url.Values{
 		"access_type":   {"offline"},
@@ -70,6 +73,8 @@ func (p *PartnerConnManager) AuthorizedHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	uri.Path = r.URL.Path
+
 	p.AuthorizationCodeChan <- AuthorizationCode{Code: code, RedirectURI: uri.String()}
 
 	fmt.Fprint(w, "authorization code received from partner connection manager")
@@ -85,8 +90,6 @@ func redirectURI(r *http.Request) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	u.Path = r.URL.Path
 
 	return u, nil
 }

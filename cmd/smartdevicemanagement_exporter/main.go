@@ -68,6 +68,7 @@ func main() {
 		AuthorizationCodeChan: authorizationCodeChan,
 		ClientID:              config.ClientID,
 		ProjectID:             *pid,
+		AuthorizedPath:        "/authorized",
 	}
 
 	sdme := smartdevicemanagementexporter.SmartDeviceManagementExporter{

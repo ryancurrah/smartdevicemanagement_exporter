@@ -4,6 +4,6 @@ go 1.15
 
 require (
 	github.com/prometheus/client_golang v1.9.0
-	golang.org/x/oauth2 v0.0.0-20201109201403-9fd604954f58
-	google.golang.org/api v0.36.0
+	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
+	google.golang.org/api v0.37.0
 )

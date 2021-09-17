@@ -53,6 +53,28 @@ var (
 		"Room",
 		"Type",
 	})
+	//https://developers.google.com/nest/device-access/traits/device/fan
+	thermostatThermostatFanGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "thermostat_thermostatFan",
+		Help:      "Thermostat fan status 0 (OFF) - 1 (ON)",
+	}, []string{
+		"CustomName",
+		"Name",
+		"Room",
+		"Type",
+	})
+	//https://developers.google.com/nest/device-access/traits/device/thermostat-hvac
+	thermostatThermostatHVACGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "thermostat_thermostatHVAC",
+		Help:      "Thermostat fan status -1 (COOLING) 0 (OFF) - 1 (HEATING)",
+	}, []string{
+		"CustomName",
+		"Name",
+		"Room",
+		"Type",
+	})
 	thermostatHumidityAmbientHumidityPercentGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: namespace,
 		Name:      "thermostat_humidity_ambientHumidityPercent",
@@ -209,6 +231,8 @@ func (s *SmartDeviceManagementExporter) recordMetrics() {
 					thermostatThermostatTemperatureSetpointHeatCelsiusGauge.With(labels).Set(thermostatTrait.SdmDevicesTraitsThermostatTemperatureSetpoint.HeatCelsius)
 					thermostatThermostatTemperatureSetpointCoolCelsiusGauge.With(labels).Set(thermostatTrait.SdmDevicesTraitsThermostatTemperatureSetpoint.CoolCelsius)
 					thermostatHumidityAmbientHumidityPercentGauge.With(labels).Set(thermostatTrait.SdmDevicesTraitsHumidity.AmbientHumidityPercent)
+					thermostatThermostatFanGauge.With(labels).Set(convertFanStatus(thermostatTrait.SdmDevicesTraitsFan.TimerMode))
+					thermostatThermostatHVACGauge.With(labels).Set(convertFanStatus(thermostatTrait.SdmDevicesTraitsThermostatHvac.Status))
 				default:
 					log.Printf("unknown device type: %s", device.Type)
 					continue
@@ -216,6 +240,24 @@ func (s *SmartDeviceManagementExporter) recordMetrics() {
 			}
 		}
 	}()
+}
+
+//https://developers.google.com/nest/device-access/traits/device/fan
+func convertFanStatus(status string) float64 {
+	if status == "ON" {
+		return 1
+	}
+	return 0
+}
+//https://developers.google.com/nest/device-access/traits/device/thermostat-hvac
+func convertHVACStatus(status string) float64 {
+	if status == "HEATING" {
+		return 1
+	}
+	if status == "COOLING" {
+		return -1
+	}
+	return 0
 }
 
 func projectID(pid string) string {
